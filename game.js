@@ -1,18 +1,18 @@
 'use strict';
 class Vector {
-constructor(x = 0, y = 0) {
-this.x = x;
-this.y = y;
-}
-plus(vector) {
-if(!(vector instanceof Vector)) {
-throw new Error ('Переданный объект не является объектом класса Vector');
-} 
-return new Vector(vector.x + this.x, vector.y + this.y);
-}
-times(factor) {
-return new Vector(this.x * factor, this.y * factor);
-}
+  constructor(x = 0, y = 0) {
+    this.x = x;
+    this.y = y;
+  }
+  plus(vector) {
+    if(!(vector instanceof Vector)) {
+      throw new Error ('Переданный объект не является объектом класса Vector');
+    } 
+    return new Vector(vector.x + this.x, vector.y + this.y);
+  }
+  times(factor) {
+    return new Vector(this.x * factor, this.y * factor);
+  }
 }
 
 class Actor {
