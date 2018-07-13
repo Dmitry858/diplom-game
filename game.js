@@ -41,7 +41,7 @@ class Actor {
 		return 'actor';
 	}
 	isIntersect(actor) {
-		if (!(actor instanceof Actor) || actor === undefined) {
+		if (!(actor instanceof Actor)) {
 			throw new Error ('Переданный объект не является объектом класса Actor, либо объект не передан');
 		}
 		if (actor === this) {
