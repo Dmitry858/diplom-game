@@ -52,28 +52,15 @@ class Actor {
 }
 
 class Level {
-	constructor(grid, actors = []) {
+	constructor(grid = [], actors = []) {
 		let player = actors.find(function(el) {
 			return el.type == 'player';
 		})
-    let height = 0;
-    let width = 0;
-    if (Array.isArray(grid)) {
-      height = grid.length;
-      for (let i = 0; i < grid.length; i++) {
-      	if (Array.isArray(grid[i])) {
-      		let z = grid[i].length;
-	      	if(width < z) {
-	          width = z;
-	        }
-      	}
-      }
-    }
 		this.grid = grid;
 		this.actors = actors;
 		this.player = player;
-		this.height = height;
-		this.width = width;
+		this.height = this.grid.length;
+		this.width = Math.max(0, ...this.grid.map(x => x.length));
 		this.status = null;
 		this.finishDelay = 1;
 	}
@@ -87,10 +74,9 @@ class Level {
 		if (!(actor instanceof Actor) || actor === undefined) {
 			throw new Error ('Переданный объект не является объектом класса Actor, либо объект не передан');
 		}
-		let result = this.actors.find(function(el) {
-			return el.isIntersect(actor) === true;
-		})
-		return result;
+		return this.actors.find(function(el) {
+			return el.isIntersect(actor);
+		});
 	}
 	obstacleAt(pos, size) {
 		try {
@@ -119,15 +105,9 @@ class Level {
 		if (index !== -1) {
 			this.actors.splice(index, 1);
 		}
-		return;
 	}
 	noMoreActors(type) {
-		for (let i = 0; i < this.actors.length; i++) {
-			if (this.actors[i].type == type) {
-				return false;
-			}
-		}
-		return true;
+		return !this.actors.some(el => el.type === type);
 	}
 	playerTouched(obstacleType, touchedObj) {
 		if (this.status !== null) {
@@ -142,7 +122,6 @@ class Level {
 		}
 		if (this.noMoreActors('coin')) {
 			this.status = 'won';
-			return;
 		}
 	}	
 }
@@ -155,7 +134,6 @@ class LevelParser {
 		if (symb !== undefined && this.dict !== undefined) {
 			return this.dict[symb];
 		}
-		return undefined;
 	}
 	obstacleFromSymbol(symb) {
 		if (symb === 'x') {
@@ -164,20 +142,9 @@ class LevelParser {
 		if (symb === '!') {
 			return 'lava';
 		}
-		return undefined;
 	}
-	createGrid(arr) {
-		const resultArray = [];
-		const innerArray = [];
-		const self = this;
-		arr.forEach(function (el) {
-			for (let i = 0; i < el.length; i++) {
-				let t = self.obstacleFromSymbol(el[i]);
-				innerArray.push(t);
-			}
-			resultArray.push(innerArray.splice(0));
-		})
-		return resultArray;
+	createGrid(arr = []) {
+		return arr.map(row => row.split('').map(symb => this.obstacleFromSymbol(symb)));
 	}
 	createActors(arr) {
 		const resultArray = [];
@@ -209,9 +176,7 @@ class Fireball extends Actor {
 		return 'fireball';
 	}
 	getNextPosition(time = 1) {
-		let newX = this.pos['x'] + this.speed['x'] * time;
-		let newY = this.pos['y'] + this.speed['y'] * time;
-    return new Vector(newX, newY);
+		return this.pos.plus(this.speed.times(time));
 	}
 	handleObstacle() {
 		this.speed['x'] = -this.speed['x'];
